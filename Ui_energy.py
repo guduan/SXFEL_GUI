@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'E:\work\DCLS_GUI\energy.ui'
+# Form implementation generated from reading ui file 'E:\work\SXFEL_GUI\energy.ui'
 #
-# Created: Thu Mar 03 10:28:01 2016
+# Created: Sat Mar 05 14:17:54 2016
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!

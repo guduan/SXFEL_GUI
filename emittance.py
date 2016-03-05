@@ -20,9 +20,7 @@ import numpy as np
 import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
-import os
-import time
-
+import os, time, platform
     
 class emit(QDialog, Ui_Dialog):
     """
@@ -36,8 +34,8 @@ class emit(QDialog, Ui_Dialog):
         self.setupUi(self)
 
         # Set up initial para.
-#        self.mplwidget1.figure.set_facecolor('none')
-#        self.mplwidget2.figure.set_facecolor('none')
+        self.mplwidget1.figure.set_facecolor('none')
+        self.mplwidget2.figure.set_facecolor('none')
 #       
 #        self.mplwidget1.figure.set_frameon(0)
 #        self.mplwidget2.figure.set_frameon(0) 
@@ -94,24 +92,42 @@ class emit(QDialog, Ui_Dialog):
         self.samples   =  float(self.lineEdit_samples.text())
         
         self.planex=self.checkBox_x_plane.isChecked()
-        self.planey=self.checkBox_x_plane.isChecked()
+        self.planey=self.checkBox_y_plane.isChecked()
         
         
         #
-        cmd='elegant v14bemit.ele -macro=use_beamline='+self.use_beamline+ \
-            ' -macro=q1name='+self.q1name+ \
-            ' -macro=q2name='+self.q2name+ \
-            ' -macro=q3name='+self.q3name+ \
-            ' -macro=q1k_from='+str(self.q1k_from)+' -macro=q1k_to='+str(self.q1k_to)+ \
-            ' -macro=q2k_from='+str(self.q2k_from)+' -macro=q2k_to='+str(self.q2k_to)+ \
-            ' -macro=q3k_from='+str(self.q3k_from)+' -macro=q3k_to='+str(self.q3k_to)+ \
-            ' -macro=steps='+str(self.steps)+ \
-            ' -rpnDefns=/Users/duan/software/notouch/defns.rpn '+ \
-            ' > log.txt'
+        sysstr=platform.system()
+        
+        if sysstr=='Windows' or sysstr=='Linux':
+            cmd='elegant v14bemit.ele -macro=use_beamline='+self.use_beamline+ \
+                ' -macro=q1name='+self.q1name+ \
+                ' -macro=q2name='+self.q2name+ \
+                ' -macro=q3name='+self.q3name+ \
+                ' -macro=q1k_from='+str(self.q1k_from)+' -macro=q1k_to='+str(self.q1k_to)+ \
+                ' -macro=q2k_from='+str(self.q2k_from)+' -macro=q2k_to='+str(self.q2k_to)+ \
+                ' -macro=q3k_from='+str(self.q3k_from)+' -macro=q3k_to='+str(self.q3k_to)+ \
+                ' -macro=steps='+str(self.steps)+ \
+                ' > log.txt'
+        else:
+            cmd='elegant v14bemit.ele -macro=use_beamline='+self.use_beamline+ \
+                ' -macro=q1name='+self.q1name+ \
+                ' -macro=q2name='+self.q2name+ \
+                ' -macro=q3name='+self.q3name+ \
+                ' -macro=q1k_from='+str(self.q1k_from)+' -macro=q1k_to='+str(self.q1k_to)+ \
+                ' -macro=q2k_from='+str(self.q2k_from)+' -macro=q2k_to='+str(self.q2k_to)+ \
+                ' -macro=q3k_from='+str(self.q3k_from)+' -macro=q3k_to='+str(self.q3k_to)+ \
+                ' -macro=steps='+str(self.steps)+ \
+                ' -rpnDefns=/Users/duan/software/notouch/defns.rpn '+ \
+                ' > log.txt'
 
         os.system(cmd)
         
-        cmd="sddscollapse -pipe=out v14bemit.fin | sddsprintout -pipe=in -col='("+self.q1name+'.K1,'+self.q2name+'.K1,'+self.q3name+".K1,Sx,Sy)' v14bemit.fit -width=100 -noTitle"
+#        cmd="sddscollapse -pipe=out v14bemit.fin | sddsprintout -pipe=in -col='("+self.q1name+'.K1,'+self.q2name+'.K1,'+self.q3name+".K1,Sx,Sy)' v14bemit.fit -width=150 -noTitle"
+        cmd='sddscollapse -pipe=out v14bemit.fin | sddsprintout -pipe=in'+ \
+        ' -col='+self.q1name+'.K1 '+ \
+        ' -col='+self.q2name+'.K1 '+ \
+        ' -col='+self.q3name+'.K1 '+ \
+        ' -col=Sx -col=Sy v14bemit.fit -width=150 -noTitle'
 
         os.system(cmd)
         
@@ -182,8 +198,17 @@ class emit(QDialog, Ui_Dialog):
             self.lineEdit_betay.setText(str(round(betay, 3)))
             self.lineEdit_gammay.setText(str(round(gammay, 3)))
         
-        self.mplwidget1.fig.axes
-  
+        self.mplwidget2.axes.plot(k01, Sx, '-ro', k01, Sy, '-bo', linewidth=1)
+        self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
+        self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
+        self.mplwidget2.axes.set_yscale('log', basey=10)
+        self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
+        
+        self.mplwidget2.figure.tight_layout()
+        self.mplwidget2.draw()
+        
+        
+
 #        self.f=np.genfromtxt('linac.Scan.001')
 #        self.imageNo=1
 #        self.timer=QTimer(self)

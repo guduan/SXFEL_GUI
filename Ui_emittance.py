@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/Users/duan/work/DCLS_GUI/emittance.ui'
+# Form implementation generated from reading ui file 'E:\work\SXFEL_GUI\emittance.ui'
 #
-# Created: Thu Mar  3 15:56:44 2016
-#      by: PyQt4 UI code generator 4.11.3
+# Created: Sat Mar 05 14:17:55 2016
+#      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -216,10 +216,10 @@ class Ui_Dialog(object):
         self.label_9 = QtGui.QLabel(Dialog)
         self.label_9.setGeometry(QtCore.QRect(420, 540, 72, 15))
         self.label_9.setObjectName(_fromUtf8("label_9"))
-        self.mplwidget1 = QtGui.QWidget(Dialog)
+        self.mplwidget1 = MatplotlibWidget(Dialog)
         self.mplwidget1.setGeometry(QtCore.QRect(190, 50, 351, 281))
         self.mplwidget1.setObjectName(_fromUtf8("mplwidget1"))
-        self.mplwidget2 = QtGui.QWidget(Dialog)
+        self.mplwidget2 = MatplotlibWidget(Dialog)
         self.mplwidget2.setGeometry(QtCore.QRect(580, 50, 351, 281))
         self.mplwidget2.setObjectName(_fromUtf8("mplwidget2"))
 
@@ -273,6 +273,7 @@ class Ui_Dialog(object):
         self.label_8.setText(_translate("Dialog", "v0.2-160302 guduan@sinap.ac.cn", None))
         self.label_9.setText(_translate("Dialog", "Progress", None))
 
+from matplotlibwidget import MatplotlibWidget
 
 if __name__ == "__main__":
     import sys
