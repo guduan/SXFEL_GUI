@@ -3,7 +3,7 @@
 """
 Module implementing emit.
 """
-import sys
+import sys, os, time, platform
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -12,15 +12,10 @@ from Ui_emittance import Ui_Dialog
 from util_gettransmat import util_gettransmat
 from util_matplotlibwidget import MatplotlibWidget
 
-
 from pylab import *
-from PIL import Image
 
 import numpy as np
-import matplotlib.cm as cm
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
-import os, time, platform
+
     
 class emit(QDialog, Ui_Dialog):
     """
@@ -88,8 +83,8 @@ class emit(QDialog, Ui_Dialog):
         self.q3k_from  =  float(self.lineEdit_q3k_from.text())
         self.q3k_to    =  float(self.lineEdit_q3k_to.text())
 
-        self.steps     =  float(self.lineEdit_steps.text())
-        self.samples   =  float(self.lineEdit_samples.text())
+        self.steps     =  int(self.lineEdit_steps.text())
+        self.samples   =  int(self.lineEdit_samples.text())
         
         self.planex=self.checkBox_x_plane.isChecked()
         self.planey=self.checkBox_y_plane.isChecked()
@@ -131,106 +126,130 @@ class emit(QDialog, Ui_Dialog):
 
         os.system(cmd)
         
+        # show images on profiles. plot on mplwidget1
+        cmd="sddssplit v14bemit.out -digits=2 -rootname='img' -extension='out'"
+        os.system(cmd)
         
+        img=np.zeros((self.steps,100,100))
+
+        for i in range(1, self.steps+1):
+            cmd='sddshist2d -pipe=out img%.2d.out -col=x,y -xparam=100 -yparam=100 -smooth \
+            | sddsprintout -col=frequency -pipe=in img%.2d.h2d -noTitle' %(i, i)
+            os.system(cmd)
+   
+        self.imageNo=1
+        self.timer=QTimer(self)
+        self.connect(self.timer,SIGNAL("timeout()"),self.Getprofileimg) 
+        self.timer.start(1000) # ms
+
+
+        # -------------------
         data=np.loadtxt('v14bemit.fit',skiprows=3)
 
-        k01=data[:,0]
-        k02=data[:,1]
-        k03=data[:,2]
-        Sx=data[:,3]
-        Sy=data[:,4]
+        self.k01=data[:,0]
+        self.k02=data[:,1]
+        self.k03=data[:,2]
+        self.Sx=data[:,3]
+        self.Sy=data[:,4]
 
-        Sx2=Sx**2
-        Sy2=Sy**2
+        self.Sx2=self.Sx**2
+        self.Sy2=self.Sy**2
 
-        steps=k01.shape[0]
+        Rq01=np.zeros((self.steps,6,6))
+        Rd02=np.zeros((self.steps,6,6))
+        Rq02=np.zeros((self.steps,6,6))
+        Rd03=np.zeros((self.steps,6,6))
+        Rq03=np.zeros((self.steps,6,6))
+        Rd04=np.zeros((self.steps,6,6))
+        R=np.zeros((self.steps,6,6))
 
-        Rq01=np.zeros((steps,6,6))
-        Rd02=np.zeros((steps,6,6))
-        Rq02=np.zeros((steps,6,6))
-        Rd03=np.zeros((steps,6,6))
-        Rq03=np.zeros((steps,6,6))
-        Rd04=np.zeros((steps,6,6))
-        R=np.zeros((steps,6,6))
-
-        for i in range(steps):
-            Rq01[i]=util_gettransmat('quad',[0.1,k01[i]])
+        for i in range(self.steps):
+            Rq01[i]=util_gettransmat('quad',[0.1,self.k01[i]])
             Rd02[i]=util_gettransmat('drift',[0.1])
-            Rq02[i]=util_gettransmat('quad',[0.2,k02[i]])
+            Rq02[i]=util_gettransmat('quad',[0.2,self.k02[i]])
             Rd03[i]=util_gettransmat('drift',[0.1])
-            Rq03[i]=util_gettransmat('quad',[0.1,k03[i]])
+            Rq03[i]=util_gettransmat('quad',[0.1,self.k03[i]])
             Rd04[i] =util_gettransmat('drift',[0.485])
             
             R[i]=reduce(np.dot,[Rd04[i],Rq03[i],Rd03[i],Rq02[i],Rd02[i],Rq01[i]])
 
-        R11=R[:,0,0].reshape(steps,1)
-        R12=R[:,0,1].reshape(steps,1)
-        R33=R[:,2,2].reshape(steps,1)
-        R34=R[:,2,3].reshape(steps,1)
+        R11=R[:,0,0].reshape(self.steps,1)
+        R12=R[:,0,1].reshape(self.steps,1)
+        R33=R[:,2,2].reshape(self.steps,1)
+        R34=R[:,2,3].reshape(self.steps,1)
             
-        Tx=np.column_stack((R11**2,R11*R12,R12**2))
-        Ty=np.column_stack((R33**2,R33*R34,R34**2))
+        self.Tx=np.column_stack((R11**2,R11*R12,R12**2))
+        self.Ty=np.column_stack((R33**2,R33*R34,R34**2))
 
-        ax,bx,cx=np.linalg.lstsq(Tx,Sx2)[0]
-        ay,by,cy=np.linalg.lstsq(Ty,Sy2)[0]
-
-
-        ex=np.sqrt(ax*cx-bx**2/4)
-        betax=ax/ex
-        alphax=-bx/2/ex
-        gammax=(1+alphax**2)/betax
-
-        ey=np.sqrt(ay*cy-by**2/4)
-        betay=ay/ey
-        alphay=-by/2/ey
-        gammay=(1+alphay**2)/betay
+        ax,bx,cx=np.linalg.lstsq(self.Tx,self.Sx2)[0]
+        ay,by,cy=np.linalg.lstsq(self.Ty,self.Sy2)[0]
 
 
-        if self.planex:
-            self.lineEdit_ex.setText(str(round(ex*1e6, 5)))
-            self.lineEdit_alphax.setText(str(round(alphax, 3)))
-            self.lineEdit_betax.setText(str(round(betax, 3)))
-            self.lineEdit_gammax.setText(str(round(gammax, 3)))
+        self.ex=np.sqrt(ax*cx-bx**2/4)
+        self.betax=ax/self.ex
+        self.alphax=-bx/2/self.ex
+        self.gammax=(1+self.alphax**2)/self.betax
+
+        self.ey=np.sqrt(ay*cy-by**2/4)
+        self.betay=ay/self.ey
+        self.alphay=-by/2/self.ey
+        self.gammay=(1+self.alphay**2)/self.betay
+
+
+
         
-        if self.planey:
-            self.lineEdit_ey.setText(str(round(ey*1e6, 5)))
-            self.lineEdit_alphay.setText(str(round(alphay, 3)))
-            self.lineEdit_betay.setText(str(round(betay, 3)))
-            self.lineEdit_gammay.setText(str(round(gammay, 3)))
-        
-        self.mplwidget2.axes.plot(k01, Sx, '-ro', k01, Sy, '-bo', linewidth=1)
+        # show beamsizes on mplwidget2
+#        self.mplwidget2.axes.plot(k01, Sx, '-ro', k01, Sy, '-bo', linewidth=1)
+#        self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
+#        self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
+#        self.mplwidget2.axes.set_yscale('log', basey=10)
+#        self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
+#        
         self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
         self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
         self.mplwidget2.axes.set_yscale('log', basey=10)
-        self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
-        
+#        self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
+      
         self.mplwidget2.figure.tight_layout()
-        self.mplwidget2.draw()
+        self.mplwidget2.axes.hold(True)
+#        self.mplwidget2.draw()
         
         
 
-#        self.f=np.genfromtxt('linac.Scan.001')
-#        self.imageNo=1
-#        self.timer=QTimer(self)
-#        self.connect(self.timer,SIGNAL("timeout()"),self.LoadImage) 
-#        self.timer.start(1000) # ms
-            
-    def LoadImage(self):
-        self.fname='./profile_img/img_%.2d.png' % self.imageNo
-        print self.fname
-        self.scene = QtGui.QGraphicsScene()
-        self.scene.addPixmap(QtGui.QPixmap(self.fname))
-        self.graphicsView_prof.setScene(self.scene)
-        self.graphicsView_prof.show()
-        self.mplwidget1.axes.plot(self.f[0:self.imageNo, 0], self.f[0:self.imageNo, 4],'r-o',  ms=8, linewidth=2)
-#        self.mplwidget1.axes.hold(True)
+    def Getprofileimg(self):
+        filestr='img%.2d.h2d' %self.imageNo
+        data=np.loadtxt(filestr, skiprows=2)
+        img=data.reshape([100,100])
+        self.mplwidget1.axes.imshow(img)
         self.mplwidget1.draw()
-#        plt.pause(0.5)
         
+        self.mplwidget2.axes.plot(self.k01[self.imageNo-1], self.Sx[self.imageNo-1], 'ro', self.k01[self.imageNo-1], self.Sy[self.imageNo-1], 'bo', linewidth=1)
+        self.mplwidget2.draw()
+        
+        # progress bar
+        val=float(self.imageNo)/self.steps*100
+        self.progressBar.setValue(val)
         
         self.imageNo +=1
-        if self.imageNo==11:
+        if self.imageNo==self.steps:
             self.timer.stop()
+            self.progressBar.setValue(100)
+            
+            self.mplwidget2.axes.plot(self.k01, self.Sx, '-ro', self.k01, self.Sy, '-bo', linewidth=1)
+            self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
+            self.mplwidget2.draw()
+            
+            if self.planex:
+                self.lineEdit_ex.setText(str(round(self.ex*1e6, 5)))
+                self.lineEdit_alphax.setText(str(round(self.alphax, 3)))
+                self.lineEdit_betax.setText(str(round(self.betax, 3)))
+                self.lineEdit_gammax.setText(str(round(self.gammax, 3)))
+            
+            if self.planey:
+                self.lineEdit_ey.setText(str(round(self.ey*1e6, 5)))
+                self.lineEdit_alphay.setText(str(round(self.alphay, 3)))
+                self.lineEdit_betay.setText(str(round(self.betay, 3)))
+                self.lineEdit_gammay.setText(str(round(self.gammay, 3)))
 
 
     @pyqtSignature("")
