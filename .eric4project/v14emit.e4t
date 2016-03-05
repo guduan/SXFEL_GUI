@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Tasks SYSTEM "Tasks-4.2.dtd">
+<!-- eric4 tasks file for project v14emit -->
+<!-- Saved: 2016-03-05, 10:20:53 -->
+<Tasks version="4.2">
+  <Task priority="1" completed="False" bugfix="False">
+    <Summary>TODO: not implemented yet</Summary>
+    <Description></Description>
+    <Created>2016-03-03, 15:56:54</Created>
+    <Resource>
+      <Filename>emittance.py</Filename>
+      <Linenumber>232</Linenumber>
+    </Resource>
+  </Task>
+</Tasks>
