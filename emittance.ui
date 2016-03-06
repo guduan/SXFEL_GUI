@@ -463,7 +463,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QPushButton" name="pushButton_pause">
+  <widget class="QPushButton" name="pushButton_stop">
    <property name="geometry">
     <rect>
      <x>510</x>
@@ -473,7 +473,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Pause</string>
+    <string>Stop</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -492,27 +492,14 @@
   <widget class="QProgressBar" name="progressBar">
    <property name="geometry">
     <rect>
-     <x>510</x>
-     <y>540</y>
+     <x>420</x>
+     <y>560</y>
      <width>118</width>
      <height>23</height>
     </rect>
    </property>
    <property name="value">
     <number>0</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_9">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>540</y>
-     <width>72</width>
-     <height>15</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Progress</string>
    </property>
   </widget>
   <widget class="MatplotlibWidget" name="mplwidget1" native="true">
@@ -534,6 +521,39 @@
      <height>281</height>
     </rect>
    </property>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>540</y>
+     <width>111</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_9">
+      <property name="text">
+       <string>Progress:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_progress">
+      <property name="text">
+       <string>0</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <customwidgets>

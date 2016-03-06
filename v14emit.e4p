@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project v14emit -->
-<!-- Saved: 2016-03-03, 14:29:38 -->
+<!-- Saved: 2016-03-06, 01:14:44 -->
 <!-- Copyright (C) 2016 ,  -->
 <Project version="4.6">
   <Language></Language>
@@ -18,7 +18,7 @@
     <Source>emittance.py</Source>
     <Source>Ui_emittance.py</Source>
     <Source>util_gettransmat.py</Source>
-    <Source>util_matplotlibwidget.py</Source>
+    <Source>matplotlibwidget.py</Source>
   </Sources>
   <Forms>
     <Form>energy.ui</Form>

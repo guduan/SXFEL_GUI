@@ -31,6 +31,10 @@ class emit(QDialog, Ui_Dialog):
         # Set up initial para.
         self.mplwidget1.figure.set_facecolor('none')
         self.mplwidget2.figure.set_facecolor('none')
+        self.pushButton_start.setEnabled(0)
+        self.pushButton_stop.setEnabled(0)
+        
+        self.mplwidget1.axes.hold(False)
 #       
 #        self.mplwidget1.figure.set_frameon(0)
 #        self.mplwidget2.figure.set_frameon(0) 
@@ -58,10 +62,7 @@ class emit(QDialog, Ui_Dialog):
         
         self.planex=1
         self.planey=1
- 
 
-
- 
     @pyqtSignature("")
     def on_pushButton_start_clicked(self):
         """
@@ -69,7 +70,10 @@ class emit(QDialog, Ui_Dialog):
         """
 #        if not os.path.exists('profile_img'):
 #            os.mkdir('profile_img')
-        
+
+        self.clear_previous()
+        self.pushButton_stop.setEnabled(1)
+
         self.prof_select=self.comboBox_prof_select.currentText()
         
         self.use_q1=self.checkBox_q1.isChecked()
@@ -195,16 +199,6 @@ class emit(QDialog, Ui_Dialog):
         self.alphay=-by/2/self.ey
         self.gammay=(1+self.alphay**2)/self.betay
 
-
-
-        
-        # show beamsizes on mplwidget2
-#        self.mplwidget2.axes.plot(k01, Sx, '-ro', k01, Sy, '-bo', linewidth=1)
-#        self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
-#        self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
-#        self.mplwidget2.axes.set_yscale('log', basey=10)
-#        self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
-#        
         self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
         self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
         self.mplwidget2.axes.set_yscale('log', basey=10)
@@ -212,16 +206,19 @@ class emit(QDialog, Ui_Dialog):
       
         self.mplwidget2.figure.tight_layout()
         self.mplwidget2.axes.hold(True)
-#        self.mplwidget2.draw()
-        
-        
+#        self.mplwidget2.draw()  
 
     def Getprofileimg(self):
+#        self.mplwidget1.axes.cla()
+#        self.mplwidget1.figure.clf()
         filestr='img%.2d.h2d' %self.imageNo
         data=np.loadtxt(filestr, skiprows=2)
         img=data.reshape([100,100])
+        ax=self.mplwidget1.axes.imshow(img)
+#        self.mplwidget1.figure.colorbar(ax)
         self.mplwidget1.axes.imshow(img)
         self.mplwidget1.draw()
+#        self.mplwidget1.show()
         
         self.mplwidget2.axes.plot(self.k01[self.imageNo-1], self.Sx[self.imageNo-1], 'ro', self.k01[self.imageNo-1], self.Sy[self.imageNo-1], 'bo', linewidth=1)
         self.mplwidget2.draw()
@@ -229,11 +226,13 @@ class emit(QDialog, Ui_Dialog):
         # progress bar
         val=float(self.imageNo)/self.steps*100
         self.progressBar.setValue(val)
+        self.label_progress.setText(str(int(val)))
         
-        self.imageNo +=1
+        self.imageNo=self.imageNo+1
         if self.imageNo==self.steps:
             self.timer.stop()
             self.progressBar.setValue(100)
+            self.label_progress.setText(str(100))
             
             self.mplwidget2.axes.plot(self.k01, self.Sx, '-ro', self.k01, self.Sy, '-bo', linewidth=1)
             self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
@@ -269,12 +268,12 @@ class emit(QDialog, Ui_Dialog):
         self.checkBox_onsite.setChecked(False)
 
     @pyqtSignature("")
-    def on_pushButton_pause_clicked(self):
+    def on_pushButton_stop_clicked(self):
         """
         Slot documentation goes here.
         """
-        # TODO: not implemented yet
-        raise NotImplementedError
+        self.timer.stop()
+        
         
     @pyqtSignature("QString")
     def on_comboBox_prof_select_activated(self, p0):
@@ -282,6 +281,7 @@ class emit(QDialog, Ui_Dialog):
         Slot documentation goes here.
         """
         self.prof_select=self.comboBox_prof_select.currentText()
+        self.pushButton_start.setEnabled(1)
         
         if self.prof_select=='PROF01L0':
             self.use_beamline='blemit1'
@@ -290,9 +290,23 @@ class emit(QDialog, Ui_Dialog):
             self.q3name='Q03L0'
         else:
             pass
-            
-        
 
+    def clear_previous(self):
+        # clear previous informations
+        self.mplwidget1.axes.cla()
+        self.mplwidget2.axes.cla()
+        
+        self.lineEdit_ex.setText('')
+        self.lineEdit_alphax.setText('')
+        self.lineEdit_betax.setText('')
+        self.lineEdit_gammax.setText('')
+
+        self.lineEdit_ey.setText('')
+        self.lineEdit_alphay.setText('')
+        self.lineEdit_betay.setText('')
+        self.lineEdit_gammay.setText('')
+        
+        
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     myapp = emit()

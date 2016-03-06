@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'E:\work\SXFEL_GUI\emittance.ui'
+# Form implementation generated from reading ui file '/Users/duan/work/SXFEL_GUI/emittance.ui'
 #
-# Created: Sat Mar 05 14:17:55 2016
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Sun Mar  6 11:48:51 2016
+#      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -203,25 +203,37 @@ class Ui_Dialog(object):
         self.checkBox_simu.setGeometry(QtCore.QRect(10, 30, 111, 19))
         self.checkBox_simu.setChecked(True)
         self.checkBox_simu.setObjectName(_fromUtf8("checkBox_simu"))
-        self.pushButton_pause = QtGui.QPushButton(Dialog)
-        self.pushButton_pause.setGeometry(QtCore.QRect(510, 480, 81, 41))
-        self.pushButton_pause.setObjectName(_fromUtf8("pushButton_pause"))
+        self.pushButton_stop = QtGui.QPushButton(Dialog)
+        self.pushButton_stop.setGeometry(QtCore.QRect(510, 480, 81, 41))
+        self.pushButton_stop.setObjectName(_fromUtf8("pushButton_stop"))
         self.label_8 = QtGui.QLabel(Dialog)
         self.label_8.setGeometry(QtCore.QRect(10, 720, 241, 16))
         self.label_8.setObjectName(_fromUtf8("label_8"))
         self.progressBar = QtGui.QProgressBar(Dialog)
-        self.progressBar.setGeometry(QtCore.QRect(510, 540, 118, 23))
+        self.progressBar.setGeometry(QtCore.QRect(420, 560, 118, 23))
         self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName(_fromUtf8("progressBar"))
-        self.label_9 = QtGui.QLabel(Dialog)
-        self.label_9.setGeometry(QtCore.QRect(420, 540, 72, 15))
-        self.label_9.setObjectName(_fromUtf8("label_9"))
         self.mplwidget1 = MatplotlibWidget(Dialog)
         self.mplwidget1.setGeometry(QtCore.QRect(190, 50, 351, 281))
         self.mplwidget1.setObjectName(_fromUtf8("mplwidget1"))
         self.mplwidget2 = MatplotlibWidget(Dialog)
         self.mplwidget2.setGeometry(QtCore.QRect(580, 50, 351, 281))
         self.mplwidget2.setObjectName(_fromUtf8("mplwidget2"))
+        self.horizontalLayoutWidget = QtGui.QWidget(Dialog)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(420, 540, 111, 21))
+        self.horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.label_9 = QtGui.QLabel(self.horizontalLayoutWidget)
+        self.label_9.setObjectName(_fromUtf8("label_9"))
+        self.horizontalLayout.addWidget(self.label_9)
+        self.label_progress = QtGui.QLabel(self.horizontalLayoutWidget)
+        self.label_progress.setObjectName(_fromUtf8("label_progress"))
+        self.horizontalLayout.addWidget(self.label_progress)
+        self.label_10 = QtGui.QLabel(self.horizontalLayoutWidget)
+        self.label_10.setObjectName(_fromUtf8("label_10"))
+        self.horizontalLayout.addWidget(self.label_10)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -269,9 +281,11 @@ class Ui_Dialog(object):
         self.groupBox_4.setTitle(_translate("Dialog", "Mode", None))
         self.checkBox_onsite.setText(_translate("Dialog", "On Site", None))
         self.checkBox_simu.setText(_translate("Dialog", "Simulation", None))
-        self.pushButton_pause.setText(_translate("Dialog", "Pause", None))
+        self.pushButton_stop.setText(_translate("Dialog", "Stop", None))
         self.label_8.setText(_translate("Dialog", "v0.2-160302 guduan@sinap.ac.cn", None))
-        self.label_9.setText(_translate("Dialog", "Progress", None))
+        self.label_9.setText(_translate("Dialog", "Progress:", None))
+        self.label_progress.setText(_translate("Dialog", "0", None))
+        self.label_10.setText(_translate("Dialog", "%", None))
 
 from matplotlibwidget import MatplotlibWidget
 
