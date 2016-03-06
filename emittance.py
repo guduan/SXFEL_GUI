@@ -3,7 +3,7 @@
 """
 Module implementing emit.
 """
-import sys, os, time, platform
+import sys, os, time, platform, glob
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -33,18 +33,9 @@ class emit(QDialog, Ui_Dialog):
         self.mplwidget2.figure.set_facecolor('none')
         self.pushButton_start.setEnabled(0)
         self.pushButton_stop.setEnabled(0)
-        
-        self.mplwidget1.axes.hold(False)
-#       
-#        self.mplwidget1.figure.set_frameon(0)
-#        self.mplwidget2.figure.set_frameon(0) 
-
-#        self.mplwidget1 = MatplotlibWidget(self, hold=0)
-#        self.mplwidget2 = MatplotlibWidget(self, hold=1)
 
         self.prof_select='PROF01L0'
         self.modeflag='simu'
-#        self.pushButton_start.setEnabled(0)
         
         self.q1k_from=0 
         self.q1k_to=10 
@@ -121,7 +112,6 @@ class emit(QDialog, Ui_Dialog):
 
         os.system(cmd)
         
-#        cmd="sddscollapse -pipe=out v14bemit.fin | sddsprintout -pipe=in -col='("+self.q1name+'.K1,'+self.q2name+'.K1,'+self.q3name+".K1,Sx,Sy)' v14bemit.fit -width=150 -noTitle"
         cmd='sddscollapse -pipe=out v14bemit.fin | sddsprintout -pipe=in'+ \
         ' -col='+self.q1name+'.K1 '+ \
         ' -col='+self.q2name+'.K1 '+ \
@@ -131,7 +121,7 @@ class emit(QDialog, Ui_Dialog):
         os.system(cmd)
         
         # show images on profiles. plot on mplwidget1
-        cmd="sddssplit v14bemit.out -digits=2 -rootname='img' -extension='out'"
+        cmd='sddssplit v14bemit.out -digits=2 -rootname=img -extension=out'
         os.system(cmd)
         
         img=np.zeros((self.steps,100,100))
@@ -145,8 +135,7 @@ class emit(QDialog, Ui_Dialog):
         self.timer=QTimer(self)
         self.connect(self.timer,SIGNAL("timeout()"),self.Getprofileimg) 
         self.timer.start(1000) # ms
-
-
+        
         # -------------------
         data=np.loadtxt('v14bemit.fit',skiprows=3)
 
@@ -159,32 +148,33 @@ class emit(QDialog, Ui_Dialog):
         self.Sx2=self.Sx**2
         self.Sy2=self.Sy**2
 
-        Rq01=np.zeros((self.steps,6,6))
-        Rd02=np.zeros((self.steps,6,6))
-        Rq02=np.zeros((self.steps,6,6))
-        Rd03=np.zeros((self.steps,6,6))
-        Rq03=np.zeros((self.steps,6,6))
-        Rd04=np.zeros((self.steps,6,6))
-        R=np.zeros((self.steps,6,6))
-
-        for i in range(self.steps):
-            Rq01[i]=util_gettransmat('quad',[0.1,self.k01[i]])
-            Rd02[i]=util_gettransmat('drift',[0.1])
-            Rq02[i]=util_gettransmat('quad',[0.2,self.k02[i]])
-            Rd03[i]=util_gettransmat('drift',[0.1])
-            Rq03[i]=util_gettransmat('quad',[0.1,self.k03[i]])
-            Rd04[i] =util_gettransmat('drift',[0.485])
-            
-            R[i]=reduce(np.dot,[Rd04[i],Rq03[i],Rd03[i],Rq02[i],Rd02[i],Rq01[i]])
-
-        R11=R[:,0,0].reshape(self.steps,1)
-        R12=R[:,0,1].reshape(self.steps,1)
-        R33=R[:,2,2].reshape(self.steps,1)
-        R34=R[:,2,3].reshape(self.steps,1)
-            
-        self.Tx=np.column_stack((R11**2,R11*R12,R12**2))
-        self.Ty=np.column_stack((R33**2,R33*R34,R34**2))
-
+#        Rq01=np.zeros((self.steps,6,6))
+#        Rd02=np.zeros((self.steps,6,6))
+#        Rq02=np.zeros((self.steps,6,6))
+#        Rd03=np.zeros((self.steps,6,6))
+#        Rq03=np.zeros((self.steps,6,6))
+#        Rd04=np.zeros((self.steps,6,6))
+#        R=np.zeros((self.steps,6,6))
+#
+#        for i in range(self.steps):
+#            Rq01[i]=util_gettransmat('quad',[0.1,self.k01[i]])
+#            Rd02[i]=util_gettransmat('drift',[0.1])
+#            Rq02[i]=util_gettransmat('quad',[0.2,self.k02[i]])
+#            Rd03[i]=util_gettransmat('drift',[0.1])
+#            Rq03[i]=util_gettransmat('quad',[0.1,self.k03[i]])
+#            Rd04[i] =util_gettransmat('drift',[0.485])
+#            
+#            R[i]=reduce(np.dot,[Rd04[i],Rq03[i],Rd03[i],Rq02[i],Rd02[i],Rq01[i]])
+#
+#        R11=R[:,0,0].reshape(self.steps,1)
+#        R12=R[:,0,1].reshape(self.steps,1)
+#        R33=R[:,2,2].reshape(self.steps,1)
+#        R34=R[:,2,3].reshape(self.steps,1)
+#            
+#        self.Tx=np.column_stack((R11**2,R11*R12,R12**2))
+#        self.Ty=np.column_stack((R33**2,R33*R34,R34**2))
+        
+        self.Tx, self.Ty=self.GetTransMat()
         ax,bx,cx=np.linalg.lstsq(self.Tx,self.Sx2)[0]
         ay,by,cy=np.linalg.lstsq(self.Ty,self.Sy2)[0]
 
@@ -199,14 +189,34 @@ class emit(QDialog, Ui_Dialog):
         self.alphay=-by/2/self.ey
         self.gammay=(1+self.alphay**2)/self.betay
 
-        self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
-        self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
-        self.mplwidget2.axes.set_yscale('log', basey=10)
-#        self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
-      
-        self.mplwidget2.figure.tight_layout()
-        self.mplwidget2.axes.hold(True)
-#        self.mplwidget2.draw()  
+    def GetTransMat(self):
+        Rq01=np.zeros((self.steps,6,6))
+        Rd02=np.zeros((self.steps,6,6))
+        Rq02=np.zeros((self.steps,6,6))
+        Rd03=np.zeros((self.steps,6,6))
+        Rq03=np.zeros((self.steps,6,6))
+        Rd04=np.zeros((self.steps,6,6))
+        R=np.zeros((self.steps,6,6))
+
+        for i in range(self.steps):
+            Rq01[i]=util_gettransmat('quad',[0.1,self.k01[i]])
+            Rd02[i]=util_gettransmat('drift',[0.1])
+            Rq02[i]=util_gettransmat('quad',[0.2,self.k02[i]])
+            Rd03[i]=util_gettransmat('drift',[0.1])
+            Rq03[i]=util_gettransmat('quad',[0.1,self.k03[i]])
+            Rd04[i]=util_gettransmat('drift',[0.485])
+            
+            R[i]=reduce(np.dot,[Rd04[i],Rq03[i],Rd03[i],Rq02[i],Rd02[i],Rq01[i]])
+
+        R11=R[:,0,0].reshape(self.steps,1)
+        R12=R[:,0,1].reshape(self.steps,1)
+        R33=R[:,2,2].reshape(self.steps,1)
+        R34=R[:,2,3].reshape(self.steps,1)
+            
+        Tx=np.column_stack((R11**2,R11*R12,R12**2))
+        Ty=np.column_stack((R33**2,R33*R34,R34**2))
+        
+        return Tx, Ty
 
     def Getprofileimg(self):
 #        self.mplwidget1.axes.cla()
@@ -214,25 +224,32 @@ class emit(QDialog, Ui_Dialog):
         filestr='img%.2d.h2d' %self.imageNo
         data=np.loadtxt(filestr, skiprows=2)
         img=data.reshape([100,100])
-        ax=self.mplwidget1.axes.imshow(img)
 #        self.mplwidget1.figure.colorbar(ax)
         self.mplwidget1.axes.imshow(img)
-        self.mplwidget1.draw()
-#        self.mplwidget1.show()
+        self.mplwidget1.axes.set_xlabel('x axis [pixel]', fontsize=12)
+        self.mplwidget1.axes.set_ylabel('y axis [pixel]', fontsize=12)
+        self.mplwidget1.figure.tight_layout()
+        self.mplwidget1.axes.hold(False)
         
+        self.mplwidget1.draw()
+        
+        # show the beamsizes VS k1
         self.mplwidget2.axes.plot(self.k01[self.imageNo-1], self.Sx[self.imageNo-1], 'ro', self.k01[self.imageNo-1], self.Sy[self.imageNo-1], 'bo', linewidth=1)
+        self.mplwidget2.axes.set_xlabel('Q01L0.K1 [$m^{-1}$]', fontsize=12)
+        self.mplwidget2.axes.set_ylabel('$\sigma$ [m]', fontsize=12)
+        self.mplwidget2.axes.set_yscale('log', basey=10)
+        self.mplwidget2.figure.tight_layout()
+        self.mplwidget2.axes.hold(True)
         self.mplwidget2.draw()
         
         # progress bar
         val=float(self.imageNo)/self.steps*100
         self.progressBar.setValue(val)
-        self.label_progress.setText(str(int(val)))
         
         self.imageNo=self.imageNo+1
         if self.imageNo==self.steps:
             self.timer.stop()
             self.progressBar.setValue(100)
-            self.label_progress.setText(str(100))
             
             self.mplwidget2.axes.plot(self.k01, self.Sx, '-ro', self.k01, self.Sy, '-bo', linewidth=1)
             self.mplwidget2.axes.legend(['$\sigma_x$','$\sigma_y$' ], fontsize=9, frameon=0, loc='best')
@@ -249,6 +266,16 @@ class emit(QDialog, Ui_Dialog):
                 self.lineEdit_alphay.setText(str(round(self.alphay, 3)))
                 self.lineEdit_betay.setText(str(round(self.betay, 3)))
                 self.lineEdit_gammay.setText(str(round(self.gammay, 3)))
+                
+            # delete temporal files
+            del_types=('*.h2d','*.out', '*.twi', '*.cen', '*.fi*', '*.mag', '*.param', '*.sig')
+            del_files=[]
+            for type in del_types:
+                del_files.extend(glob.glob(type))
+            
+            for file in del_files:
+                os.remove(file)
+
 
 
     @pyqtSignature("")
@@ -288,9 +315,19 @@ class emit(QDialog, Ui_Dialog):
             self.q1name='Q01L0'
             self.q2name='Q02L0'
             self.q3name='Q03L0'
+        elif self.prof_select=='PROF01L1':
+            self.use_beamline='blemit2'
+            self.q1name='Q01L1'
+            self.q2name='Q02L1'
+            self.q3name='Q03L1'
         else:
             pass
-
+        
+        
+        self.checkBox_q1.setText(self.q1name)
+        self.checkBox_q2.setText(self.q2name)
+        self.checkBox_q3.setText(self.q3name)
+        
     def clear_previous(self):
         # clear previous informations
         self.mplwidget1.axes.cla()

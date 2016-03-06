@@ -10,6 +10,12 @@
     <height>740</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <weight>50</weight>
+    <bold>false</bold>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
@@ -19,16 +25,18 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>380</x>
+     <x>370</x>
      <y>10</y>
-     <width>231</width>
+     <width>311</width>
      <height>41</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Times New Roman</family>
-     <pointsize>14</pointsize>
+     <pointsize>18</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
     </font>
    </property>
    <property name="text">
@@ -76,22 +84,7 @@
     </item>
     <item>
      <property name="text">
-      <string>Q03</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Q05</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Q09</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Q11</string>
+      <string>PROF01L1</string>
      </property>
     </item>
    </widget>
@@ -141,7 +134,7 @@
      <item row="2" column="0">
       <widget class="QCheckBox" name="checkBox_q2">
        <property name="text">
-        <string>Q02L0</string>
+        <string/>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -151,7 +144,7 @@
      <item row="3" column="0">
       <widget class="QCheckBox" name="checkBox_q3">
        <property name="text">
-        <string>Q03L0</string>
+        <string/>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -168,7 +161,7 @@
      <item row="1" column="0">
       <widget class="QCheckBox" name="checkBox_q1">
        <property name="text">
-        <string>Q01L0</string>
+        <string/>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -502,56 +495,34 @@
     <number>0</number>
    </property>
   </widget>
-  <widget class="MatplotlibWidget" name="mplwidget1" native="true">
+  <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>50</y>
-     <width>351</width>
-     <height>281</height>
+     <x>420</x>
+     <y>540</y>
+     <width>72</width>
+     <height>15</height>
     </rect>
    </property>
-  </widget>
-  <widget class="MatplotlibWidget" name="mplwidget2" native="true">
-   <property name="geometry">
-    <rect>
-     <x>580</x>
-     <y>50</y>
-     <width>351</width>
-     <height>281</height>
-    </rect>
+   <property name="text">
+    <string>Progress：</string>
    </property>
   </widget>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>420</x>
-     <y>540</y>
-     <width>111</width>
-     <height>21</height>
+     <x>220</x>
+     <y>60</y>
+     <width>711</width>
+     <height>321</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QLabel" name="label_9">
-      <property name="text">
-       <string>Progress:</string>
-      </property>
-     </widget>
+     <widget class="MatplotlibWidget" name="mplwidget1"/>
     </item>
     <item>
-     <widget class="QLabel" name="label_progress">
-      <property name="text">
-       <string>0</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="label_10">
-      <property name="text">
-       <string>%</string>
-      </property>
-     </widget>
+     <widget class="MatplotlibWidget" name="mplwidget2"/>
     </item>
    </layout>
   </widget>

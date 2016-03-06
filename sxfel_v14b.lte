@@ -920,8 +920,6 @@ w4: watch, filename="BC2.out", mode=coord
 w5: watch, filename="L3.out", mode=coord
 wm: watch, filename="match.in", mode=coord
 
-wprf01l0: watch, filename="wprf01l0.out", mode=coord
-
 !-------------------------------------------------------------------------------------------------
 L0: LINE=(DZERO, DZERO, D01L0, Q01L0, D02L0, Q02L0, D03L0, Q03L0, D04L0, &
           BLL01, BPM01L0, CRR01L0, DCRR, PRF01L0, VALV, BLL01, D05L0, &
@@ -1039,8 +1037,13 @@ bl: LINE=(c, L0WAKE, L0, w0, L1, w1, BC1, w2,&
     BI1, L2, w3, BC2, w4, BI2, L3, w5, BI3)
 bl1: LINE=(c, L0WAKE, L0)
 
+! Gun exit
+blemit1:LINE=(c, L0WAKE,DZERO, DZERO, D01L0, Q01L0, D02L0, Q02L0, D03L0, Q03L0, D04L0, BLL01, BPM01L0, CRR01L0, DCRR, PRF01L0)
 
-blemit1:LINE=(c, L0WAKE,DZERO, DZERO, D01L0, Q01L0, D02L0, Q02L0, D03L0, Q03L0, D04L0, BLL01, BPM01L0, CRR01L0, DCRR, PRF01L0,wprf01l0)
+! Injector exit
+blemit2: LINE=(c, L0WAKE, L0, w0,DZERO, D01L1, Q01L1, D02L1, Q02L1, D03L1, Q03L1, D04L1, BLL01, BPM01L1, CRR01L1, DCRR, DBPMlsc, PRF01L1)
+
+! Linac exit
 
 
 
